@@ -1,0 +1,34 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <!--
+      This jelly script is used for per-project configuration.
+
+      See global.jelly for a general discussion about jelly script.
+    -->
+
+    <f:optionalBlock name="youtrack.pluginEnabled" title="Integrate with YouTrack" checked="${instance.pluginEnabled}">
+        <j:if test="${descriptor.sites.size() &gt; 0}">
+            <f:entry title="Youtrack Site">
+                <select class="setting-input" name="youtrack.siteName">
+                    <j:forEach var="s" items="${descriptor.sites}">
+                        <f:option selected="${s.url==instance.url}">${s.url}</f:option>
+                    </j:forEach>
+                </select>
+            </f:entry>
+
+            <f:entry title="Update YouTrack issue with link to build">
+                <f:checkbox name="youtrack.commentsEnabled" checked="${instance.commentsEnabled}"/>
+            </f:entry>
+
+            <f:entry title="Execute commands">
+                <f:checkbox name="youtrack.commandsEnabled" checked="${instance.commandsEnabled}"/>
+            </f:entry>
+
+            <f:entry title="Run as">
+                <f:checkbox name="youtrack.runAsEnabled" checked="${instance.runAsEnabled}"/>
+            </f:entry>
+
+        </j:if>
+    </f:optionalBlock>
+
+</j:jelly>

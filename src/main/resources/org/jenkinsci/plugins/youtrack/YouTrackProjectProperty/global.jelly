@@ -1,0 +1,37 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <!--
+      This Jelly script is used to produce the global configuration option.
+
+      Jenkins uses a set of tag libraries to provide uniformity in forms.
+      To determine where this tag is defined, first check the namespace URI,
+      and then look under $JENKINS/views/. For example, <f:section> is defined
+      in $JENKINS/views/lib/form/section.jelly.
+
+      It's also often useful to just check other similar scripts to see what
+      tags they use. Views are always organized according to its owner class,
+      so it should be straightforward to find them.
+    -->
+    <f:section title="YouTrack">
+        <f:entry title="YouTRACK sites" description="Here you setup the YouTrack sites you want to connect to">
+            <f:repeatable name="youtracksites" var="site" items="${descriptor.sites}">
+                <table width="100%">
+                    <f:entry title="YouTRACK URL" field="url">
+                        <f:textbox name="youtrack.url" value="${site.url}"/>
+                    </f:entry>
+                    <f:entry title="YouTRACK Username">
+                        <f:textbox name="youtrack.username" value="${site.username}"/>
+                    </f:entry>
+                    <f:entry title="YouTRACK Password">
+                        <f:password name="youtrack.password" value="${site.password}"/>
+                    </f:entry>
+                    <f:entry title="">
+                        <div align="right">
+                            <f:repeatableDeleteButton/>
+                        </div>
+                    </f:entry>
+                </table>
+            </f:repeatable>
+        </f:entry>
+    </f:section>
+</j:jelly>
