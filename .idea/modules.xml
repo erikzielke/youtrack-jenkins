@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/youtrack.iml" filepath="$PROJECT_DIR$/youtrack.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Jenkins Youtrack Plugin.iml" filepath="$PROJECT_DIR$/Jenkins Youtrack Plugin.iml" />
     </modules>
   </component>
 </project>
