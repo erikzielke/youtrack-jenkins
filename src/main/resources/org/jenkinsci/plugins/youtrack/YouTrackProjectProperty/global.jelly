@@ -13,16 +13,16 @@
       so it should be straightforward to find them.
     -->
     <f:section title="YouTrack">
-        <f:entry title="YouTRACK sites" description="Here you setup the YouTrack sites you want to connect to">
+        <f:entry title="YouTrack sites" description="Here you setup the YouTrack sites you want to connect to. The specific site is then selected in the build configuration">
             <f:repeatable name="youtracksites" var="site" items="${descriptor.sites}">
                 <table width="100%">
-                    <f:entry title="YouTRACK URL" field="url">
+                    <f:entry title="YouTrack URL" field="url">
                         <f:textbox name="youtrack.url" value="${site.url}"/>
                     </f:entry>
-                    <f:entry title="YouTRACK Username">
+                    <f:entry title="YouTrack Username" field="username">
                         <f:textbox name="youtrack.username" value="${site.username}"/>
                     </f:entry>
-                    <f:entry title="YouTRACK Password">
+                    <f:entry title="YouTrack Password" field="password">
                         <f:password name="youtrack.password" value="${site.password}"/>
                     </f:entry>
                     <f:entry title="">
