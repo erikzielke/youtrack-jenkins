@@ -15,6 +15,7 @@ public class YouTrackSite {
     private transient boolean runAsEnabled;
     private transient boolean commandsEnabled;
     private transient boolean commentEnabled;
+    private transient boolean annotationsEnabled;
 
     @DataBoundConstructor
     public YouTrackSite(String username, String password, String url) {
@@ -69,6 +70,14 @@ public class YouTrackSite {
 
     public void setCommandsEnabled(boolean commandsEnabled) {
         this.commandsEnabled = commandsEnabled;
+    }
+
+    public boolean isAnnotationsEnabled() {
+        return annotationsEnabled;
+    }
+
+    public void setAnnotationsEnabled(boolean annotationsEnabled) {
+        this.annotationsEnabled = annotationsEnabled;
     }
 
     public static YouTrackSite get(AbstractProject<?, ?> project) {

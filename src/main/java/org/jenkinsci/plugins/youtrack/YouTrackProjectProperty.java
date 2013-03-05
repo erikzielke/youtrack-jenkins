@@ -16,18 +16,20 @@ public class YouTrackProjectProperty extends JobProperty<AbstractProject<?, ?>> 
     private boolean commentsEnabled;
     private boolean commandsEnabled;
     private boolean runAsEnabled;
+    private boolean annotationsEnabled;
 
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
 
     @DataBoundConstructor
-    public YouTrackProjectProperty(String siteName, boolean pluginEnabled, boolean commentsEnabled, boolean commandsEnabled, boolean runAsEnabled) {
+    public YouTrackProjectProperty(String siteName, boolean pluginEnabled, boolean commentsEnabled, boolean commandsEnabled, boolean runAsEnabled, boolean annotationsEnabled) {
         this.siteName = siteName;
         this.pluginEnabled = pluginEnabled;
         this.commentsEnabled = commentsEnabled;
         this.commandsEnabled = commandsEnabled;
         this.runAsEnabled = runAsEnabled;
+        this.annotationsEnabled = annotationsEnabled;
     }
 
     @Override
@@ -73,6 +75,14 @@ public class YouTrackProjectProperty extends JobProperty<AbstractProject<?, ?>> 
 
     public void setSiteName(String siteName) {
         this.siteName = siteName;
+    }
+
+    public boolean isAnnotationsEnabled() {
+        return annotationsEnabled;
+    }
+
+    public void setAnnotationsEnabled(boolean annotationsEnabled) {
+        this.annotationsEnabled = annotationsEnabled;
     }
 
     public static final class DescriptorImpl extends JobPropertyDescriptor {
@@ -136,6 +146,7 @@ public class YouTrackProjectProperty extends JobProperty<AbstractProject<?, ?>> 
             result.setPluginEnabled(pluginEnabled);
             result.setCommentEnabled(commentsEnabled);
             result.setCommandsEnabled(commandsEnabled);
+            result.setAnnotationsEnabled(annotationsEnabled);
             result.setRunAsEnabled(runAsEnabled);
         }
         return result;

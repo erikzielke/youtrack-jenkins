@@ -16,6 +16,10 @@
                 </select>
             </f:entry>
 
+            <f:entry title="Annotate changelog">
+                <f:checkbox name="youtrack.annotationsEnabled" checked="${instance.annotationsEnabled}"/>
+            </f:entry>
+
             <f:entry title="Update YouTrack issue with link to build">
                 <f:checkbox name="youtrack.commentsEnabled" checked="${instance.commentsEnabled}"/>
             </f:entry>

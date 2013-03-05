@@ -24,9 +24,9 @@ public class YouTrackChangeLogAnnotator extends ChangeLogAnnotator {
     public void annotate(AbstractBuild<?, ?> abstractBuild, ChangeLogSet.Entry entry, MarkupText markupText) {
         AbstractProject<?, ?> project = abstractBuild.getProject();
         YouTrackSite youTrackSite = YouTrackSite.get(project);
-        LOGGER.info("Annotating change");
 
-        if (youTrackSite != null && youTrackSite.isPluginEnabled()) {
+        if (youTrackSite != null && youTrackSite.isPluginEnabled() && youTrackSite.isAnnotationsEnabled()) {
+            LOGGER.info("Annotating change");
 
             YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
             User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
