@@ -20,7 +20,7 @@ public class YouTrackSCMListener extends SCMListener {
     public void onChangeLogParsed(AbstractBuild<?, ?> build, BuildListener listener, ChangeLogSet<?> changelog) throws Exception {
 
         YouTrackSite youTrackSite = YouTrackSite.get(build.getProject());
-        if (!youTrackSite.isPluginEnabled()) {
+        if (youTrackSite == null || !youTrackSite.isPluginEnabled()) {
             return;
         }
 
@@ -29,6 +29,8 @@ public class YouTrackSCMListener extends SCMListener {
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
         List<Project> projects = youTrackServer.getProjects(user);
+
+        build.addAction(new YouTrackSaveProjectShortNamesAction(projects));
 
 
         while (changeLogIterator.hasNext()) {

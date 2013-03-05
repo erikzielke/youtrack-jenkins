@@ -99,8 +99,7 @@ public class YouTrackProjectProperty extends JobProperty<AbstractProject<?, ?>> 
         }
 
         public YouTrackSite[] getSites() {
-            YouTrackSite[] youTrackSites = sites.toArray(new YouTrackSite[0]);
-            return youTrackSites;
+            return sites.toArray(new YouTrackSite[0]);
         }
 
         @Override

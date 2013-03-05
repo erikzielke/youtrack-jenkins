@@ -24,16 +24,14 @@ public class YouTrackChangeLogAnnotator extends ChangeLogAnnotator {
     public void annotate(AbstractBuild<?, ?> abstractBuild, ChangeLogSet.Entry entry, MarkupText markupText) {
         AbstractProject<?, ?> project = abstractBuild.getProject();
         YouTrackSite youTrackSite = YouTrackSite.get(project);
+        YouTrackSaveProjectShortNamesAction action = abstractBuild.getProject().getLastBuild().getAction(YouTrackSaveProjectShortNamesAction.class);
+        List<String> shortNames = action.getShortNames();
 
         if (youTrackSite != null && youTrackSite.isPluginEnabled() && youTrackSite.isAnnotationsEnabled()) {
             LOGGER.info("Annotating change");
 
-            YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
-            User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
-            List<Project> projects = youTrackServer.getProjects(user);
             String msg = entry.getMsg();
-            for (Project project1 : projects) {
-                String shortName = project1.getShortName();
+            for (String shortName : shortNames) {
                 Pattern projectPattern = Pattern.compile("(" + shortName + "-" + "(\\d+)" + ")");
                 Matcher matcher = projectPattern.matcher(msg);
                 while (matcher.find()) {
