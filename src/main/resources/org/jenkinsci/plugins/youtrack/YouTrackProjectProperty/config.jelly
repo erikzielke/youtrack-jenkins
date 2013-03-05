@@ -16,19 +16,19 @@
                 </select>
             </f:entry>
 
-            <f:entry title="Annotate changelog">
-                <f:checkbox name="youtrack.annotationsEnabled" checked="${instance.annotationsEnabled}"/>
+            <f:entry title="Annotate changelog" field="annotations">
+                <f:checkbox  name="youtrack.annotationsEnabled" checked="${instance.annotationsEnabled}"/>
             </f:entry>
 
-            <f:entry title="Update YouTrack issue with link to build">
+            <f:entry title="Update YouTrack issue with link to build" field="commentlink">
                 <f:checkbox name="youtrack.commentsEnabled" checked="${instance.commentsEnabled}"/>
             </f:entry>
 
-            <f:entry title="Execute commands">
+            <f:entry title="Execute commands" field="execute">
                 <f:checkbox name="youtrack.commandsEnabled" checked="${instance.commandsEnabled}"/>
             </f:entry>
 
-            <f:entry title="Run as">
+            <f:entry title="Run as" field="runas">
                 <f:checkbox name="youtrack.runAsEnabled" checked="${instance.runAsEnabled}"/>
             </f:entry>
 
