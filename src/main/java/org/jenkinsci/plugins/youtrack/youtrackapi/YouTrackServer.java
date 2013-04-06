@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
+import hudson.model.AbstractBuild;
 import net.sf.json.util.JSONUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -15,10 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -159,6 +157,7 @@ public class YouTrackServer {
         try {
             URL url = new URL(serverUrl + "/rest/user/login");
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
@@ -181,6 +180,31 @@ public class YouTrackServer {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void addBuildToBundle(AbstractBuild<?, ?> build, User user, String bundleName, String buildName) {
+        try {
+            String encode = URLEncoder.encode(bundleName, "ISO-8859-1").replace("+","%20");
+            String encode1 = URLEncoder.encode(buildName, "ISO-8859-1").replace("+","%20");
+            URL url = new URL(serverUrl + "/rest/admin/customfield/buildBundle/" + encode + "/"  + encode1);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("PUT");
+            for (String cookie : user.getCookies()) {
+                urlConnection.setRequestProperty("Cookie", cookie);
+            }
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
+            outputStreamWriter.flush();
+
+
+            int responseCode = urlConnection.getResponseCode();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class MyDefaultHandler extends DefaultHandler {

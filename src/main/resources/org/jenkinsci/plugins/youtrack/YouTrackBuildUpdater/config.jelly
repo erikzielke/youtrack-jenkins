@@ -1,0 +1,16 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="" field="name">
+        <label>
+            <f:textbox value="${instance.name}"/>
+            Name appended to build number
+        </label>
+    </f:entry>
+    <f:entry title="" field="bundleName">
+        <label>
+            <f:textbox value="${instance.bundleName}"/>
+            Bundle name to update
+        </label>
+    </f:entry>
+</j:jelly>
