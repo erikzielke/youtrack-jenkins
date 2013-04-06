@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.listeners.SCMListener;
 import hudson.scm.ChangeLogSet;
+import hudson.tasks.Mailer;
 import org.jenkinsci.plugins.youtrack.youtrackapi.Issue;
 import org.jenkinsci.plugins.youtrack.youtrackapi.Project;
 import org.jenkinsci.plugins.youtrack.youtrackapi.User;
@@ -67,16 +68,14 @@ public class YouTrackSCMListener extends SCMListener {
                         String patternString = "\\(((" + stringBuilder.toString() + " -\\d+), )*(" + stringBuilder.toString() + " -\\d+)\\)";
                         Pattern pattern = Pattern.compile(patternString);
 
-
-                        String comment = line.substring(0, line.indexOf("#"));
                         String issueStart = line.substring(line.indexOf("#")+1);
-
                         Project p = null;
                         for (Project project : projects) {
                             if (issueStart.startsWith(project.getShortName() + "-")) {
                                 p = project;
                             }
                         }
+
                         if(p != null) {
                             Pattern projectPattern = Pattern.compile("(" + p.getShortName() + "-" + "(\\d+)" + ") (.*)");
                             Matcher matcher = projectPattern.matcher(issueStart);
@@ -84,11 +83,11 @@ public class YouTrackSCMListener extends SCMListener {
                                 if (matcher.groupCount() >= 1) {
                                     String issueId = p.getShortName() + "-" + matcher.group(2);
                                     if (!youTrackSite.isRunAsEnabled()) {
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, null);
+                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), null, null);
                                     } else {
-                                        User runAs = new User();
-                                        runAs.setUsername(next.getAuthor().getId());
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, runAs);
+                                        String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
+                                        User userByEmail = youTrackServer.getUserByEmail(user, address);
+                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), null, userByEmail);
                                     }
                                 }
                             }

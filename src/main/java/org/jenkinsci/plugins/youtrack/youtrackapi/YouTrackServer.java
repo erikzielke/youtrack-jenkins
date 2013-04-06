@@ -10,12 +10,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -91,6 +90,8 @@ public class YouTrackServer {
 
     public void applyCommand(User user, Issue issue, String command, String comment, User runAs) {
         try {
+
+
             URL url = new URL(serverUrl + "/rest/issue/"+issue.getId()+"/execute");
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setDoOutput(true);
@@ -101,18 +102,57 @@ public class YouTrackServer {
             }
 
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
-            String str = "comment=" + comment + "&command=" + command;
+
+
+            String str = "command=" + command;
+            if(comment != null) {
+                str += "&comment=" + comment;
+            }
             if(runAs != null) {
-                str += "&runAs=" + user.getUsername();
+                str += "&runAs=" + runAs.getUsername();
             }
             outputStreamWriter.write(str);
             outputStreamWriter.flush();
 
             int responseCode = urlConnection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getErrorStream()));
+                String l;
+                while (( l = bufferedReader.readLine())  != null) {
+                    System.out.println(l);
+                }
+            }
+
             System.out.println(responseCode);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public User getUserByEmail(User user, String email) {
+        try {
+            URL url = new URL(serverUrl + "/rest/admin/user?q=" + email);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+            for (String cookie : user.getCookies()) {
+                urlConnection.setRequestProperty("Cookie", cookie);
+            }
+
+            int responseCode = urlConnection.getResponseCode();
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            User.UserRefHandler dh = new User.UserRefHandler();
+            saxParser.parse(urlConnection.getInputStream(), dh);
+            return dh.getUser();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
     }
 
     public User login(String username, String password) {
