@@ -67,8 +67,16 @@ public class YouTrackSCMListener extends SCMListener {
 
                         String patternString = "\\(((" + stringBuilder.toString() + " -\\d+), )*(" + stringBuilder.toString() + " -\\d+)\\)";
                         Pattern pattern = Pattern.compile(patternString);
-
+                        String comment = null;
                         String issueStart = line.substring(line.indexOf("#")+1);
+
+                        if(i + 1 < lines.length) {
+                            String l = lines[i + 1];
+                            if(!l.contains("#")) {
+                                comment = l;
+                            }
+                        }
+
                         Project p = null;
                         for (Project project : projects) {
                             if (issueStart.startsWith(project.getShortName() + "-")) {
@@ -83,11 +91,11 @@ public class YouTrackSCMListener extends SCMListener {
                                 if (matcher.groupCount() >= 1) {
                                     String issueId = p.getShortName() + "-" + matcher.group(2);
                                     if (!youTrackSite.isRunAsEnabled()) {
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), null, null);
+                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, null);
                                     } else {
                                         String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
                                         User userByEmail = youTrackServer.getUserByEmail(user, address);
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), null, userByEmail);
+                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, userByEmail);
                                     }
                                 }
                             }
