@@ -1,5 +1,4 @@
-batch commands
-limit calls to youtrack, only on tooltip and on scm update
-fixed in build
 documentation
+console logging
+batch commands
 
