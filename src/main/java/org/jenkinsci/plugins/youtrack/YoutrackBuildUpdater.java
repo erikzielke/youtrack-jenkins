@@ -5,19 +5,20 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import hudson.scm.ChangeLogSet;
+import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.youtrack.youtrackapi.Issue;
 import org.jenkinsci.plugins.youtrack.youtrackapi.User;
 import org.jenkinsci.plugins.youtrack.youtrackapi.YouTrackServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Updates build bundle
@@ -53,6 +54,8 @@ public class YouTrackBuildUpdater extends Recorder {
         return BuildStepMonitor.NONE;
     }
 
+
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 
@@ -74,6 +77,20 @@ public class YouTrackBuildUpdater extends Recorder {
         }
         youTrackServer.addBuildToBundle(build, user, getBundleName(), buildName);
 
+        YouTrackSaveFixedIssues action = build.getAction(YouTrackSaveFixedIssues.class);
+        if(action != null) {
+            List<String> issueIds = action.getIssueIds();
+            if(build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
+
+                for (String issueId : issueIds) {
+                Issue issue = new Issue(issueId);
+
+                    youTrackServer.applyCommand(user, issue, "Fixed in build " + buildName, null, null);
+                }
+            }
+
+        }
+
         return true;
     }
 
@@ -84,6 +101,8 @@ public class YouTrackBuildUpdater extends Recorder {
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
         }
+
+
 
         @Override
         public String getDisplayName() {

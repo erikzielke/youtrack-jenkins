@@ -102,9 +102,9 @@ public class YouTrackServer {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(urlConnection.getOutputStream());
 
 
-            String str = "command=" + command;
+            String str = "command=" + URLEncoder.encode(command, "UTF-8");
             if(comment != null) {
-                str += "&comment=" + comment;
+                str += "&comment=" + URLEncoder.encode(comment, "UTF-8");
             }
             if(runAs != null) {
                 str += "&runAs=" + runAs.getUsername();
@@ -148,7 +148,7 @@ public class YouTrackServer {
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return null;
     }
@@ -185,7 +185,7 @@ public class YouTrackServer {
     public void addBuildToBundle(AbstractBuild<?, ?> build, User user, String bundleName, String buildName) {
         try {
             String encode = URLEncoder.encode(bundleName, "ISO-8859-1").replace("+","%20");
-            String encode1 = URLEncoder.encode(buildName, "ISO-8859-1").replace("+","%20");
+            String encode1 = URLEncoder.encode(buildName, "ISO-8859-1").replace("+", "%20");
             URL url = new URL(serverUrl + "/rest/admin/customfield/buildBundle/" + encode + "/"  + encode1);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("PUT");
@@ -206,6 +206,39 @@ public class YouTrackServer {
             e.printStackTrace();
         }
     }
+
+    public Issue getIssue(User user, String issueId) {
+        try {
+            URL url = new URL(serverUrl + "/rest/issue/" + issueId);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            for (String cookie : user.getCookies()) {
+                urlConnection.setRequestProperty("Cookie", cookie);
+            }
+
+
+            int responseCode = urlConnection.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) {
+                try {
+                    SAXParserFactory factory = SAXParserFactory.newInstance();
+                    SAXParser saxParser = factory.newSAXParser();
+                    Issue.IssueHandler issueHandler = new Issue.IssueHandler();
+                    saxParser.parse(urlConnection.getInputStream(), issueHandler);
+                    return issueHandler.getIssue();
+                } catch (ParserConfigurationException e) {
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     private static class MyDefaultHandler extends DefaultHandler {
         private List<Project> projects;

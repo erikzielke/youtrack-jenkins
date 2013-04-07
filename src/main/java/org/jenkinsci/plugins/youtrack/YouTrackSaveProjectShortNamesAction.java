@@ -9,11 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Erik
- * Date: 05-03-13
- * Time: 19:11
- * To change this template use File | Settings | File Templates.
+ * An invisible action which only purpose is to save the short names for use in {@link YouTrackChangeLogAnnotator}
  */
 public class YouTrackSaveProjectShortNamesAction extends InvisibleAction {
     private String shortNames;

@@ -10,6 +10,7 @@ import org.jenkinsci.plugins.youtrack.youtrackapi.Project;
 import org.jenkinsci.plugins.youtrack.youtrackapi.User;
 import org.jenkinsci.plugins.youtrack.youtrackapi.YouTrackServer;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -33,6 +34,7 @@ public class YouTrackSCMListener extends SCMListener {
 
         build.addAction(new YouTrackSaveProjectShortNamesAction(projects));
 
+        List<Issue> fixedIssues = new ArrayList<Issue>();
 
         while (changeLogIterator.hasNext()) {
             ChangeLogSet.Entry next = changeLogIterator.next();
@@ -86,6 +88,7 @@ public class YouTrackSCMListener extends SCMListener {
 
                         if(p != null) {
                             Pattern projectPattern = Pattern.compile("(" + p.getShortName() + "-" + "(\\d+)" + ") (.*)");
+
                             Matcher matcher = projectPattern.matcher(issueStart);
                             while (matcher.find()) {
                                 if (matcher.groupCount() >= 1) {
@@ -95,15 +98,32 @@ public class YouTrackSCMListener extends SCMListener {
                                     } else {
                                         String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
                                         User userByEmail = youTrackServer.getUserByEmail(user, address);
+
+                                        //Get the issue state, then apply command, and get the issue state again.
+                                        //to know whether the command has been marked as fixed, instead of trying to
+                                        //interpret the command. This means however that there is a possibility for
+                                        //the user to change state between the before and the after call, so the after
+                                        //state can be affected by something else than the command.
+                                        Issue before = youTrackServer.getIssue(user, issueId);
                                         youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, userByEmail);
+                                        Issue after = youTrackServer.getIssue(user, issueId);
+
+                                        if(!before.getState().equals("Fixed") && after.getState().equals("Fixed")) {
+                                            fixedIssues.add(after);
+                                        }
+
                                     }
                                 }
                             }
+
                         }
                     }
                 }
             }
         }
+
+        build.addAction(new YouTrackSaveFixedIssues(fixedIssues));
+
 
         super.onChangeLogParsed(build, listener, changelog);
     }
