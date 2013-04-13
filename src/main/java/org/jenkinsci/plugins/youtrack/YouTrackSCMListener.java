@@ -30,8 +30,9 @@ public class YouTrackSCMListener extends SCMListener {
 
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
-        List<Project> projects = youTrackServer.getProjects(user);
 
+        //
+        List<Project> projects = youTrackServer.getProjects(user);
         build.addAction(new YouTrackSaveProjectShortNamesAction(projects));
 
         List<Issue> fixedIssues = new ArrayList<Issue>();
@@ -40,6 +41,7 @@ public class YouTrackSCMListener extends SCMListener {
             ChangeLogSet.Entry next = changeLogIterator.next();
             String msg = next.getMsg();
 
+            //Add a comment  he
             if (youTrackSite.isCommentEnabled()) {
                 for (Project project1 : projects) {
                     String shortName = project1.getShortName();

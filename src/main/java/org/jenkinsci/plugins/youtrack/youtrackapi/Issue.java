@@ -5,43 +5,67 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- *
+ * This object represents an issue.
  */
 public class Issue {
+    /**
+     * The id of the issue.
+     */
     private String id;
+    /**
+     * The state of the issue.
+     */
     private String state;
 
+    /**
+     * Constructs an issue object with the given id.
+     *
+     * @param id id of issue.
+     */
     public Issue(String id) {
         this.id = id;
     }
 
+    /**
+     * @return the id of the issue.
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Gets the state of the issue.
+     *
+     * @return the state of the issue.
+     */
     public String getState() {
         return state;
     }
 
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public static class IssueHandler extends DefaultHandler  {
+    /**
+     * Parses data of an issue request. It only parses the state field.
+     */
+    public static class IssueHandler extends DefaultHandler {
+        /**
+         * Field currently being parsed.
+         */
         private String currentField;
+        /**
+         * Holder for character data.
+         */
         private StringBuilder stringBuilder = new StringBuilder();
+        /**
+         * Holder for the result.
+         */
         private Issue issue;
 
+        /**
+         * The resulting issue object.
+         *
+         * @return the issue.
+         */
         public Issue getIssue() {
             return issue;
-        }
-
-        public void setIssue(Issue issue) {
-            this.issue = issue;
         }
 
         @Override
@@ -53,10 +77,10 @@ public class Issue {
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             super.startElement(uri, localName, qName, attributes);
             stringBuilder.setLength(0);
-            if(qName.equals("issue")) {
+            if (qName.equals("issue")) {
                 this.issue = new Issue(attributes.getValue("id"));
             }
-            if(qName.equals("field")) {
+            if (qName.equals("field")) {
                 currentField = attributes.getValue("name");
             }
         }
@@ -70,8 +94,8 @@ public class Issue {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             super.endElement(uri, localName, qName);
-            if(qName.equals("value")) {
-                if(currentField.equals("State")) {
+            if (qName.equals("value")) {
+                if (currentField.equals("State")) {
                     issue.state = stringBuilder.toString();
                 }
             }

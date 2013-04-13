@@ -75,7 +75,7 @@ public class YouTrackBuildUpdater extends Recorder {
             buildName = String.valueOf(build.getNumber()) + " (" + name + ")";
 
         }
-        youTrackServer.addBuildToBundle(build, user, getBundleName(), buildName);
+        youTrackServer.addBuildToBundle(user, getBundleName(), buildName);
 
         YouTrackSaveFixedIssues action = build.getAction(YouTrackSaveFixedIssues.class);
         if(action != null) {
