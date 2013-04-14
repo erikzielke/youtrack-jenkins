@@ -8,7 +8,6 @@
         <!-- which version of Jenkins is this plugin built against? -->
     </parent>
 
-    <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>youtrack-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
@@ -38,4 +37,12 @@
             <version>2.2.2</version>
         </dependency>
     </dependencies>
+
+    <developers>
+        <developer>
+            <id>erikzielke</id>
+            <name>Erik Zielke</name>
+            <email>erikzielke@hotmail.com</email>
+        </developer>
+    </developers>
 </project>
