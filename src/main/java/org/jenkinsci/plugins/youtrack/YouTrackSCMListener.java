@@ -30,6 +30,11 @@ public class YouTrackSCMListener extends SCMListener {
 
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
+        if(user == null) {
+            listener.getLogger().append("Could not log in with set YouTrack user");
+            return;
+        }
+        build.addAction(new YouTrackIssueAction(build.getProject()));
 
         List<Project> projects = youTrackServer.getProjects(user);
         build.addAction(new YouTrackSaveProjectShortNamesAction(projects));
