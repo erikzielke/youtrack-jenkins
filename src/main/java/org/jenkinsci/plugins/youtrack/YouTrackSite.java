@@ -10,7 +10,6 @@ public class YouTrackSite {
     private String url;
     private String username;
     private String password;
-
     private transient boolean pluginEnabled;
     private transient boolean runAsEnabled;
     private transient boolean commandsEnabled;
@@ -22,6 +21,21 @@ public class YouTrackSite {
         this.username = username;
         this.password = password;
         this.url = url;
+    }
+
+    public static YouTrackSite get(AbstractProject<?, ?> project) {
+        YouTrackProjectProperty ypp = project.getProperty(YouTrackProjectProperty.class);
+        if (ypp != null) {
+            YouTrackSite site = ypp.getSite();
+            if (site != null) {
+                return site;
+            }
+        }
+        YouTrackSite[] sites = YouTrackProjectProperty.DESCRIPTOR.getSites();
+        if (sites.length == 1) {
+            return sites[0];
+        }
+        return null;
     }
 
     public String getUrl() {
@@ -80,26 +94,11 @@ public class YouTrackSite {
         this.annotationsEnabled = annotationsEnabled;
     }
 
-    public static YouTrackSite get(AbstractProject<?, ?> project) {
-        YouTrackProjectProperty ypp = project.getProperty(YouTrackProjectProperty.class);
-        if(ypp != null) {
-            YouTrackSite site = ypp.getSite();
-            if(site != null) {
-                return site;
-            }
-        }
-        YouTrackSite[] sites = YouTrackProjectProperty.DESCRIPTOR.getSites();
-        if(sites.length == 1) {
-            return sites[0];
-        }
-        return null;
+    public boolean isCommentEnabled() {
+        return commentEnabled;
     }
 
     public void setCommentEnabled(boolean commentEnabled) {
         this.commentEnabled = commentEnabled;
-    }
-
-    public boolean isCommentEnabled() {
-        return commentEnabled;
     }
 }

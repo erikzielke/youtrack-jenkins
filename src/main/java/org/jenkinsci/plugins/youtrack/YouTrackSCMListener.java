@@ -31,7 +31,6 @@ public class YouTrackSCMListener extends SCMListener {
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
 
-        //
         List<Project> projects = youTrackServer.getProjects(user);
         build.addAction(new YouTrackSaveProjectShortNamesAction(projects));
 
@@ -41,20 +40,7 @@ public class YouTrackSCMListener extends SCMListener {
             ChangeLogSet.Entry next = changeLogIterator.next();
             String msg = next.getMsg();
 
-            //Add a comment  he
-            if (youTrackSite.isCommentEnabled()) {
-                for (Project project1 : projects) {
-                    String shortName = project1.getShortName();
-                    Pattern projectPattern = Pattern.compile("(" + shortName + "-" + "(\\d+)" + ")");
-                    Matcher matcher = projectPattern.matcher(msg);
-                    while (matcher.find()) {
-                        if (matcher.groupCount() >= 1) {
-                            String issueId = shortName + "-" + matcher.group(2);
-                            youTrackServer.comment(user, new Issue(issueId), "Related build: " + build.getAbsoluteUrl());
-                        }
-                    }
-                }
-            }
+            addCommentIfEnabled(build, youTrackSite, youTrackServer, user, projects, msg);
 
             if (youTrackSite.isCommandsEnabled()) {
                 String[] lines = msg.split("\n");
@@ -69,8 +55,6 @@ public class YouTrackSCMListener extends SCMListener {
                         }
                         stringBuilder.deleteCharAt(stringBuilder.length()-1);
 
-                        String patternString = "\\(((" + stringBuilder.toString() + " -\\d+), )*(" + stringBuilder.toString() + " -\\d+)\\)";
-                        Pattern pattern = Pattern.compile(patternString);
                         String comment = null;
                         String issueStart = line.substring(line.indexOf("#")+1);
 
@@ -88,37 +72,7 @@ public class YouTrackSCMListener extends SCMListener {
                             }
                         }
 
-                        if(p != null) {
-                            Pattern projectPattern = Pattern.compile("(" + p.getShortName() + "-" + "(\\d+)" + ") (.*)");
-
-                            Matcher matcher = projectPattern.matcher(issueStart);
-                            while (matcher.find()) {
-                                if (matcher.groupCount() >= 1) {
-                                    String issueId = p.getShortName() + "-" + matcher.group(2);
-                                    if (!youTrackSite.isRunAsEnabled()) {
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, null);
-                                    } else {
-                                        String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
-                                        User userByEmail = youTrackServer.getUserByEmail(user, address);
-
-                                        //Get the issue state, then apply command, and get the issue state again.
-                                        //to know whether the command has been marked as fixed, instead of trying to
-                                        //interpret the command. This means however that there is a possibility for
-                                        //the user to change state between the before and the after call, so the after
-                                        //state can be affected by something else than the command.
-                                        Issue before = youTrackServer.getIssue(user, issueId);
-                                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, userByEmail);
-                                        Issue after = youTrackServer.getIssue(user, issueId);
-
-                                        if(!before.getState().equals("Fixed") && after.getState().equals("Fixed")) {
-                                            fixedIssues.add(after);
-                                        }
-
-                                    }
-                                }
-                            }
-
-                        }
+                        findIssueId(youTrackSite, youTrackServer, user, fixedIssues, next, comment, issueStart, p);
                     }
                 }
             }
@@ -128,6 +82,57 @@ public class YouTrackSCMListener extends SCMListener {
 
 
         super.onChangeLogParsed(build, listener, changelog);
+    }
+
+    private void findIssueId(YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Issue> fixedIssues, ChangeLogSet.Entry next, String comment, String issueStart, Project p) {
+        if(p != null) {
+            Pattern projectPattern = Pattern.compile("(" + p.getShortName() + "-" + "(\\d+)" + ") (.*)");
+
+            Matcher matcher = projectPattern.matcher(issueStart);
+            while (matcher.find()) {
+                if (matcher.groupCount() >= 1) {
+                    String issueId = p.getShortName() + "-" + matcher.group(2);
+                    if (!youTrackSite.isRunAsEnabled()) {
+                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, null);
+                    } else {
+                        String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
+                        User userByEmail = youTrackServer.getUserByEmail(user, address);
+
+                        //Get the issue state, then apply command, and get the issue state again.
+                        //to know whether the command has been marked as fixed, instead of trying to
+                        //interpret the command. This means however that there is a possibility for
+                        //the user to change state between the before and the after call, so the after
+                        //state can be affected by something else than the command.
+                        Issue before = youTrackServer.getIssue(user, issueId);
+                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, userByEmail);
+                        Issue after = youTrackServer.getIssue(user, issueId);
+
+                        if(!before.getState().equals("Fixed") && after.getState().equals("Fixed")) {
+                            fixedIssues.add(after);
+                        }
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void addCommentIfEnabled(AbstractBuild<?, ?> build, YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Project> projects, String msg) {
+        if (youTrackSite.isCommentEnabled()) {
+            for (Project project1 : projects) {
+                String shortName = project1.getShortName();
+                Pattern projectPattern = Pattern.compile("(" + shortName + "-" + "(\\d+)" + ")");
+                Matcher matcher = projectPattern.matcher(msg);
+                while (matcher.find()) {
+                    if (matcher.groupCount() >= 1) {
+                        String issueId = shortName + "-" + matcher.group(2);
+                        //noinspection deprecation
+                        youTrackServer.comment(user, new Issue(issueId), "Related build: " + build.getAbsoluteUrl());
+                    }
+                }
+            }
+        }
     }
 
     @Override

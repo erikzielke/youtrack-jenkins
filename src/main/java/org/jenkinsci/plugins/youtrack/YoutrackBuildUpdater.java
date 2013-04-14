@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Updates build bundle
+ * Updates build bundle.
  */
 public class YouTrackBuildUpdater extends Recorder {
 
@@ -68,7 +68,7 @@ public class YouTrackBuildUpdater extends Recorder {
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
 
 
-        String buildName = "";
+        String buildName;
         if(getName() == null || getName().equals("")) {
             buildName = String.valueOf(build.getNumber());
         } else {
