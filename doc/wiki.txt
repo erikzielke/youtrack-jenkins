@@ -1,0 +1,6 @@
+{hudson-plugin-info:pluginId=youtrack-plugin}
+{excerpt}
+This plugin integrates&nbsp;[YouTrack|http://www.jetbrains.com/youtrack/]&nbsp;with Jenkins.
+{excerpt}
+
+This plugin is NOT in any way affiliated with JetBrains, the creators of YouTrack.
