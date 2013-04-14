@@ -18,24 +18,46 @@ import java.io.IOException;
  */
 public class YouTrackIssueAction implements Action {
 
+    /**
+     * Reference to the project to get YouTrack site info from.
+     */
     public final AbstractProject project;
 
+    /**
+     * Constructs the action.
+     *
+     * @param project the project to get site info from.
+     */
     public YouTrackIssueAction(AbstractProject project) {
         this.project = project;
     }
 
+    /**
+     * @return No icon.
+     */
     public String getIconFileName() {
         return null;
     }
 
+    /**
+     * @return No display name.
+     */
     public String getDisplayName() {
         return null;
     }
 
+    /**
+     * @return The url part for the action.
+     */
     public String getUrlName() {
         return "youtrack";
     }
 
+    /**
+     * Generates a response containing issue data, but first logs in to YouTrack.
+     *
+     * @return the response.
+     */
     public HttpResponse doIssue() {
 
         return new HttpResponse() {

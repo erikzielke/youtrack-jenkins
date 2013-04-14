@@ -66,7 +66,10 @@ public class YouTrackBuildUpdater extends Recorder {
 
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
-
+        if(user == null) {
+            listener.getLogger().println("FAILED: to log in to youtrack");
+            return true;
+        }
 
         String buildName;
         if(getName() == null || getName().equals("")) {
@@ -75,7 +78,13 @@ public class YouTrackBuildUpdater extends Recorder {
             buildName = String.valueOf(build.getNumber()) + " (" + name + ")";
 
         }
-        youTrackServer.addBuildToBundle(user, getBundleName(), buildName);
+        boolean addedBuild = youTrackServer.addBuildToBundle(user, getBundleName(), buildName);
+        if(addedBuild) {
+            listener.getLogger().println("Added build " + buildName + " to bundle: " + getBundleName());
+        } else {
+            listener.getLogger().println("FAILED: adding build " + buildName + " to bundle: " + getBundleName());
+            return true;
+        }
 
         YouTrackSaveFixedIssues action = build.getAction(YouTrackSaveFixedIssues.class);
         if(action != null) {
@@ -85,7 +94,12 @@ public class YouTrackBuildUpdater extends Recorder {
                 for (String issueId : issueIds) {
                 Issue issue = new Issue(issueId);
 
-                    youTrackServer.applyCommand(user, issue, "Fixed in build " + buildName, null, null);
+                    boolean success = youTrackServer.applyCommand(user, issue, "Fixed in build " + buildName, null, null);
+                    if(success) {
+                        listener.getLogger().println("Updated Fixed in build to " + buildName + " for " + issueId);
+                    } else {
+                        listener.getLogger().println("FAILED: updating Fixed in build to " + buildName + " for " + issueId);
+                    }
                 }
             }
 

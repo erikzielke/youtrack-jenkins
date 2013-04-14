@@ -8,10 +8,6 @@ import hudson.model.Hudson;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.scm.ChangeLogSet;
 import org.apache.log4j.Logger;
-import org.jenkinsci.plugins.youtrack.youtrackapi.Issue;
-import org.jenkinsci.plugins.youtrack.youtrackapi.Project;
-import org.jenkinsci.plugins.youtrack.youtrackapi.User;
-import org.jenkinsci.plugins.youtrack.youtrackapi.YouTrackServer;
 
 import java.util.List;
 import java.util.regex.Matcher;

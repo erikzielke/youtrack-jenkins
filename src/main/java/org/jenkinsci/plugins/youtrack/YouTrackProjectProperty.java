@@ -10,12 +10,31 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 public class YouTrackProjectProperty extends JobProperty<AbstractProject<?, ?>> {
-
+    /**
+     * The name of the site.
+     */
     private String siteName;
+
+    /**
+     * If the YouTrack plugin is enabled.
+     */
     private boolean pluginEnabled;
+    /**
+     * If ping back comments is enabled.
+     */
     private boolean commentsEnabled;
+    /**
+     * If executing commands is enabled.
+     */
     private boolean commandsEnabled;
+    /**
+     * If the commands should be run as the vcs user.
+     */
     private boolean runAsEnabled;
+
+    /**
+     * If ChangeLog annotations is enabled.
+     */
     private boolean annotationsEnabled;
 
     @Extension

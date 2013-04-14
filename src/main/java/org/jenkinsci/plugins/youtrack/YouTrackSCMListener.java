@@ -31,7 +31,7 @@ public class YouTrackSCMListener extends SCMListener {
         YouTrackServer youTrackServer = new YouTrackServer(youTrackSite.getUrl());
         User user = youTrackServer.login(youTrackSite.getUsername(), youTrackSite.getPassword());
         if(user == null) {
-            listener.getLogger().append("Could not log in with set YouTrack user");
+            listener.getLogger().append("FALIED: log in with set YouTrack user");
             return;
         }
         build.addAction(new YouTrackIssueAction(build.getProject()));
@@ -45,7 +45,7 @@ public class YouTrackSCMListener extends SCMListener {
             ChangeLogSet.Entry next = changeLogIterator.next();
             String msg = next.getMsg();
 
-            addCommentIfEnabled(build, youTrackSite, youTrackServer, user, projects, msg);
+            addCommentIfEnabled(build, youTrackSite, youTrackServer, user, projects, msg, listener);
 
             if (youTrackSite.isCommandsEnabled()) {
                 String[] lines = msg.split("\n");
@@ -77,7 +77,7 @@ public class YouTrackSCMListener extends SCMListener {
                             }
                         }
 
-                        findIssueId(youTrackSite, youTrackServer, user, fixedIssues, next, comment, issueStart, p);
+                        findIssueId(youTrackSite, youTrackServer, user, fixedIssues, next, comment, issueStart, p, listener);
                     }
                 }
             }
@@ -89,7 +89,7 @@ public class YouTrackSCMListener extends SCMListener {
         super.onChangeLogParsed(build, listener, changelog);
     }
 
-    private void findIssueId(YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Issue> fixedIssues, ChangeLogSet.Entry next, String comment, String issueStart, Project p) {
+    private void findIssueId(YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Issue> fixedIssues, ChangeLogSet.Entry next, String comment, String issueStart, Project p, BuildListener listener) {
         if(p != null) {
             Pattern projectPattern = Pattern.compile("(" + p.getShortName() + "-" + "(\\d+)" + ") (.*)");
 
@@ -102,6 +102,9 @@ public class YouTrackSCMListener extends SCMListener {
                     } else {
                         String address = next.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
                         User userByEmail = youTrackServer.getUserByEmail(user, address);
+                        if (userByEmail == null) {
+                            listener.getLogger().println("Failed to find user with e-mail: " + address);
+                        }
 
                         //Get the issue state, then apply command, and get the issue state again.
                         //to know whether the command has been marked as fixed, instead of trying to
@@ -109,7 +112,13 @@ public class YouTrackSCMListener extends SCMListener {
                         //the user to change state between the before and the after call, so the after
                         //state can be affected by something else than the command.
                         Issue before = youTrackServer.getIssue(user, issueId);
-                        youTrackServer.applyCommand(user, new Issue(issueId), matcher.group(3), comment, userByEmail);
+                        String command = matcher.group(3);
+                        boolean applied = youTrackServer.applyCommand(user, new Issue(issueId), command, comment, userByEmail);
+                        if(applied) {
+                            listener.getLogger().println("Applied command: " + command + " to issue: " + issueId);
+                        } else {
+                            listener.getLogger().println("FAILED: Applying command: " + command + " to issue: " + issueId);
+                        }
                         Issue after = youTrackServer.getIssue(user, issueId);
 
                         if(!before.getState().equals("Fixed") && after.getState().equals("Fixed")) {
@@ -123,7 +132,7 @@ public class YouTrackSCMListener extends SCMListener {
         }
     }
 
-    private void addCommentIfEnabled(AbstractBuild<?, ?> build, YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Project> projects, String msg) {
+    private void addCommentIfEnabled(AbstractBuild<?, ?> build, YouTrackSite youTrackSite, YouTrackServer youTrackServer, User user, List<Project> projects, String msg, BuildListener listener) {
         if (youTrackSite.isCommentEnabled()) {
             for (Project project1 : projects) {
                 String shortName = project1.getShortName();
@@ -133,7 +142,12 @@ public class YouTrackSCMListener extends SCMListener {
                     if (matcher.groupCount() >= 1) {
                         String issueId = shortName + "-" + matcher.group(2);
                         //noinspection deprecation
-                        youTrackServer.comment(user, new Issue(issueId), "Related build: " + build.getAbsoluteUrl());
+                        boolean comment = youTrackServer.comment(user, new Issue(issueId), "Related build: " + build.getAbsoluteUrl());
+                        if(comment) {
+                            listener.getLogger().println("Commented on " + issueId);
+                        } else {
+                            listener.getLogger().println("FAILED: Commented on " + issueId);
+                        }
                     }
                 }
             }
